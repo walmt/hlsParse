@@ -18,7 +18,7 @@ func main() {
 	t := new(ts.Ts)
 
 	nums := 0
-	times := 1
+	times := 2
 
 	for true {
 

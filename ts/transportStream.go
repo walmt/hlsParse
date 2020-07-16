@@ -56,12 +56,6 @@ var AdaptationFieldFlagMap = map[byte]string{
 	AdaptationFieldFlagHavePCR: "0x50（有PCR）",
 }
 
-type AdaptationField struct {
-	TransportStream *TransportStream
-
-	HaveAdaptationField bool
-}
-
 type Payload struct {
 	TransportStream *TransportStream
 }
@@ -172,72 +166,6 @@ func (t *TransportStream) getAdaptationField() *AdaptationField {
 
 	return t.AdaptationField
 }
-
-func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
-
-	adaptationFieldControl := a.TransportStream.TsHeader.AdaptationFieldControl
-	if adaptationFieldControl != AdaptationFieldControl10 &&
-		adaptationFieldControl != AdaptationFieldControl11 {
-		return index, nil
-	}
-	a.HaveAdaptationField = true
-
-	adaptationFieldLength := buf[index : index+8]
-	if a.TransportStream.TsHeader.AdaptationFieldControl == AdaptationFieldControl11 {
-		// 既有自适应区又有有效荷载时，adaptationFieldLength介于0~182
-
-	}
-
-
-	index += 8
-
-	return 0, nil
-}
-
-//func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
-//
-//	adaptationFieldControl := a.TransportStream.TsHeader.AdaptationFieldControl
-//	if adaptationFieldControl != AdaptationFieldControl10 &&
-//		adaptationFieldControl != AdaptationFieldControl11 {
-//		return index, nil
-//	}
-//
-//	a.HaveAdaptationField = true
-//	adaptationFieldLength := buf[index]
-//	if len(buf[index+1:]) < int(adaptationFieldLength) {
-//		return 0, fmt.Errorf("len(buf[index+1:]) < int(adaptationFieldLength)")
-//	}
-//	fmt.Printf("AdaptationField Length is %v\n", adaptationFieldLength)
-//
-//	index += 1
-//
-//	flag := buf[index]
-//	flagString, ok := AdaptationFieldFlagMap[flag]
-//	if !ok {
-//		return 0, fmt.Errorf("AdaptationFieldFlagMap[flag] failed, flag:%x", flag)
-//	}
-//	fmt.Printf("AdaptationField Flag is %v\n", flagString)
-//
-//	index += 1
-//
-//	pcr := buf[index : index+5]
-//	if flag == AdaptationFieldFlagNoPCR && !util.BytesIsZero(pcr) {
-//		return 0, fmt.Errorf("have no pcr but pcr is not zero")
-//	}
-//	fmt.Printf("AdaptationField PCR is %v\n", pcr)
-//
-//	index += 5
-//
-//	stuffingBytes := buf[index : index+int(adaptationFieldLength)-6]
-//	if !util.BytesIsOxFF(stuffingBytes) {
-//		return 0, fmt.Errorf("AdaptationField StuffingBytes is not 0xFF, StuffingBytes:%v", stuffingBytes)
-//	}
-//	fmt.Printf("AdaptationField StuffingBytes length:%v\n", len(stuffingBytes))
-//
-//	index += int(adaptationFieldLength) - 6
-//
-//	return index, nil
-//}
 
 func (t *TransportStream) getPayload() *Payload {
 	if t.Payload != nil {
