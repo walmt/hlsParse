@@ -24,6 +24,28 @@ func BytesIsOxFF(buf []byte) bool {
 	return true
 }
 
+func BytesToUint64ByBigEndian(buf []byte) (uint64, error) {
+
+	if len(buf) > 8 {
+		return 0, fmt.Errorf("buf len more than 8, len:%v", len(buf))
+	}
+
+	b := make([]byte, 8)
+	less := 8 - len(buf)
+	for i := 0; i < len(buf); i++ {
+		b[i+less] = buf[i]
+	}
+
+	bytesBuffer := bytes.NewBuffer(b)
+
+	var x uint64
+	if err := binary.Read(bytesBuffer, binary.BigEndian, &x); err != nil {
+		return 0, fmt.Errorf("binary.Read failed, err:%v", err)
+	}
+
+	return x, nil
+}
+
 func BytesToInt32ByBigEndian(buf []byte) (int32, error) {
 
 	if len(buf) > 4 {

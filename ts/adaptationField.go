@@ -14,6 +14,8 @@ const (
 	SplicingPointFlagMark                 = 0b00000100
 	TransportPrivateDataFlagMark          = 0b00000010
 	AdaptationFieldExtensionFlagMark      = 0b00000001
+	Const1Value0Mark                      = 0b01111110
+	ProgramClockReferenceExtensionMark    = 0b00000001
 )
 
 type AdaptationField struct {
@@ -76,8 +78,41 @@ func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
 	index += 1
 
 	if pcrFlag == 1 {
+		if len(buf[index:]) < 6 {
+			return 0, fmt.Errorf("pcr: len(buf[index:]) < 6")
+		}
+		pcrbBuf := make([]byte, 5)
+		pcrbBuf[0] = buf[index] >> 7
+		pcrbBuf[1] = buf[index]<<1 + buf[index+1]>>7
+		pcrbBuf[2] = buf[index+1]<<1 + buf[index+2]>>7
+		pcrbBuf[3] = buf[index+2]<<1 + buf[index+3]>>7
+		pcrbBuf[4] = buf[index+3]<<1 + buf[index+4]>>7
+		programClockReferenceBase, err := util.BytesToUint64ByBigEndian(pcrbBuf)
+		if err != nil {
+			return 0, fmt.Errorf("util.BytesToUint64ByBigEndian(pcrbBuf) failed, err:%v", err)
+		}
+		fmt.Printf("programClockReferenceBase is %v\n", programClockReferenceBase)
 
+		index += 4
+
+		const1Value0 := (buf[index] & Const1Value0Mark) >> 1
+		if const1Value0 != 0b00111111 {
+			return 0, fmt.Errorf("const1Value0 != 0b00111111")
+		}
+		fmt.Printf("const1Value0 is 0b00111111\n")
+
+		pcreBuf := make([]byte, 2)
+		pcreBuf[0] = buf[index] & ProgramClockReferenceExtensionMark
+		pcreBuf[1] = buf[index+1]
+
+		programClockReferenceExtension, err := util.BytesToUint16ByBigEndian(pcreBuf)
+		if err != nil {
+			return 0, fmt.Errorf("util.BytesToUint16ByBigEndian(pcreBuf) failed, err:%v", err)
+		}
+		fmt.Printf("programClockReferenceExtension is %v\n", programClockReferenceExtension)
+
+		index += 1
 	}
 
-	return 0, nil
+	return 0, fmt.Errorf("not parse complete")
 }
