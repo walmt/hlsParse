@@ -17,8 +17,8 @@ func main() {
 	buf := make([]byte, 0)
 	t := new(ts.Ts)
 
-	nums := 0
-	times := 2
+	//nums := 0
+	//times := 2
 
 	for true {
 
@@ -43,10 +43,10 @@ func main() {
 			os.Exit(0)
 		}
 
-		nums++
-		if nums == times {
-			break
-		}
+		//nums++
+		//if nums == times {
+		//	break
+		//}
 	}
 
 	fmt.Println()
