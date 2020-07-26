@@ -5,6 +5,7 @@ import (
 )
 
 type TransportStream struct {
+	Ts              *Ts
 	TsHeader        *TsHeader
 	AdaptationField *AdaptationField
 	Payload         *Payload
