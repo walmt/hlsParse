@@ -49,6 +49,14 @@ type TsHeader struct {
 	PayloadUnitStartIndicator byte
 }
 
+func BuildTsHeader(t *TransportStream) *TsHeader {
+
+	tsHeader := new(TsHeader)
+	tsHeader.TransportStream = t
+
+	return tsHeader
+}
+
 func (t *TsHeader) Parse(buf []byte, index int) (int, error) {
 	if len(buf[index:]) < 4 { // header长度固定为4
 		return 0, fmt.Errorf("len(buf) != 4")

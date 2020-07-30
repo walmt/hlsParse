@@ -3,9 +3,11 @@ package ts
 import "fmt"
 
 type Ts struct {
-	CurrentTransportStream  *TransportStream
-	ProgramAssociationTable *ProgramAssociationTable
-	ProgramMapTable         *ProgramMapTable
+	PacketNum                   int
+	CurrentTransportStream      *TransportStream
+	ProgramAssociationTable     *ProgramAssociationTable
+	ProgramMapTable             *ProgramMapTable
+	PacketizedElementaryStreams *PacketizedElementaryStreams
 }
 
 const (
@@ -20,7 +22,13 @@ func (t *Ts) Parse(buf []byte) ([]byte, error) {
 			return buf[index:], nil
 		}
 
+		fmt.Printf("----------------------------------------\n")
+		fmt.Printf("ts packet: %v\n", t.PacketNum)
+
+		t.PacketNum++
+
 		tsBuf := buf[index : index+TransportStreamLength]
+		fmt.Printf("tsBuf:\n%x\n", tsBuf)
 		ts := t.createTransportStream()
 		err := ts.Parse(tsBuf)
 		if err != nil {
@@ -41,8 +49,7 @@ func (t *Ts) createTransportStream() *TransportStream {
 
 func (t *Ts) getProgramAssociationTable() *ProgramAssociationTable {
 	if t.ProgramAssociationTable == nil {
-		t.ProgramAssociationTable = new(ProgramAssociationTable)
-		t.ProgramAssociationTable.Ts = t
+		t.ProgramAssociationTable = BuildProgramAssociationTable(t)
 	}
 
 	return t.ProgramAssociationTable
@@ -50,9 +57,16 @@ func (t *Ts) getProgramAssociationTable() *ProgramAssociationTable {
 
 func (t *Ts) getProgramMapTable() *ProgramMapTable {
 	if t.ProgramMapTable == nil {
-		t.ProgramMapTable = new(ProgramMapTable)
-		t.ProgramMapTable.Ts = t
+		t.ProgramMapTable = BuildProgramMapTable(t)
 	}
 
 	return t.ProgramMapTable
+}
+
+func (t *Ts) getPacketizedElementaryStreams() *PacketizedElementaryStreams {
+	if t.PacketizedElementaryStreams == nil {
+		t.PacketizedElementaryStreams = BuildPacketizedElementaryStreams(t)
+	}
+
+	return t.PacketizedElementaryStreams
 }

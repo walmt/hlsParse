@@ -41,6 +41,14 @@ type ProgramAssociationTable struct {
 	ProgramMapPid uint16
 }
 
+func BuildProgramAssociationTable(t *Ts) *ProgramAssociationTable {
+
+	p := new(ProgramAssociationTable)
+	p.Ts = t
+
+	return p
+}
+
 func (p *ProgramAssociationTable) Parse(buf []byte, index int) (int, error) {
 
 	// 去掉调整字节

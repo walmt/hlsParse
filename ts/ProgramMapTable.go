@@ -3,11 +3,11 @@ package ts
 import (
 	"fmt"
 	"hlsParse/util"
-	"os"
 )
 
 type ProgramMapTable struct {
-	Ts *Ts
+	Ts               *Ts
+	PidStreamTypeMap map[uint16]uint8
 }
 
 const (
@@ -36,6 +36,15 @@ const (
 var PmtCurrentNextIndicatorMap = map[uint8]string{
 	PmtCurrentNextIndicator0: "0, 表示当前传送的program_map_section不可用，下一个TS的program_map_section有效。",
 	PmtCurrentNextIndicator1: "1, 表示当前传送的program_map_section可用",
+}
+
+func BuildProgramMapTable(t *Ts) *ProgramMapTable {
+
+	p := new(ProgramMapTable)
+	p.PidStreamTypeMap = make(map[uint16]uint8)
+	p.Ts = t
+
+	return p
 }
 
 func (p *ProgramMapTable) Parse(buf []byte, index int) (int, error) {
@@ -150,7 +159,7 @@ func (p *ProgramMapTable) Parse(buf []byte, index int) (int, error) {
 
 	for index < descriptorIndexEnd {
 		streamType := buf[index]
-		fmt.Printf("streamType is 0x%x\n", streamType)
+		fmt.Printf("streamType is 0x%02x(0x1b - h264、0x0f - AAC、0x03 - mp3)\n", streamType)
 
 		index += 1
 
@@ -166,6 +175,7 @@ func (p *ProgramMapTable) Parse(buf []byte, index int) (int, error) {
 		if err != nil {
 			return 0, fmt.Errorf("util.BytesToUint16ByBigEndian(elementaryPidBuf) failed, err:%v", err)
 		}
+		p.PidStreamTypeMap[elementaryPid] = streamType
 		fmt.Printf("elementaryPid is 0x%x\n", elementaryPid)
 
 		index += 2

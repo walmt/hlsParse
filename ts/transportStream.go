@@ -43,8 +43,7 @@ func (t *TransportStream) Parse(buf []byte) error {
 func (t *TransportStream) getTsHeader() *TsHeader {
 
 	if t.TsHeader == nil {
-		t.TsHeader = new(TsHeader)
-		t.TsHeader.TransportStream = t
+		t.TsHeader = BuildTsHeader(t)
 	}
 
 	return t.TsHeader
@@ -53,8 +52,7 @@ func (t *TransportStream) getTsHeader() *TsHeader {
 func (t *TransportStream) getAdaptationField() *AdaptationField {
 
 	if t.AdaptationField == nil {
-		t.AdaptationField = new(AdaptationField)
-		t.AdaptationField.TransportStream = t
+		t.AdaptationField = BuildAdaptationField(t)
 	}
 
 	return t.AdaptationField
@@ -63,8 +61,7 @@ func (t *TransportStream) getAdaptationField() *AdaptationField {
 func (t *TransportStream) getPayload() *Payload {
 
 	if t.Payload == nil {
-		t.Payload = new(Payload)
-		t.Payload.TransportStream = t
+		t.Payload = BuildPayload(t)
 	}
 
 	return t.Payload

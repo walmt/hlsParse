@@ -44,6 +44,14 @@ type AdaptationField struct {
 	AdaptationFieldExtensionFlag uint8
 }
 
+func BuildAdaptationField(t *TransportStream) *AdaptationField {
+
+	a := new(AdaptationField)
+	a.TransportStream = t
+
+	return a
+}
+
 func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
 
 	adaptationFieldControl := a.TransportStream.TsHeader.AdaptationFieldControl
@@ -60,6 +68,11 @@ func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
 	fmt.Printf("adaptationFieldLength is %v\n", adaptationFieldLength)
 
 	index += 1
+
+	if adaptationFieldLength == 0 {
+		return index, nil
+	}
+
 	endIndex := index + int(adaptationFieldLength)
 
 	discontinuityIndicator := (buf[index] & DiscontinuityIndicatorMark) >> 7
@@ -113,7 +126,7 @@ func (a *AdaptationField) Parse(buf []byte, index int) (int, error) {
 
 		const1Value0 := (buf[index] & Const1Value0Mark) >> 1
 		if const1Value0 != 0b00111111 {
-			return 0, fmt.Errorf("const1Value0 != 0b00111111")
+			return 0, fmt.Errorf("const1Value0 != 0b00111111, const1Value0:%08b", const1Value0)
 		}
 		fmt.Printf("const1Value0 is 0b00111111\n")
 
